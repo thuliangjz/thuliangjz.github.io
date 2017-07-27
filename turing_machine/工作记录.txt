@@ -1,0 +1,25 @@
+view_graph类：
+用户通过与这个类交互对底层的图灵机模型进行修改
+建立之初传入svg(通过select得到)和一个tm对象
+管理node和link的selection
+node对应状态
+link对应状态之间的关联(link只存储关联，即source和target)
+两者对应的显示都通过g-element作为单位(node包含节点和节点名，link包含path和marked)
+数据结构：
+nodes: {id, name}
+links: {source, target}
+这里的node和turing_machine的states都是稀疏的数组，在作为data时需要
+
+turing machine
+管理状态转移函数数组，符号带以及运行时信息
+控制符号带的增长
+状态存储在名为states的数组中，每一个数组项最多包含11个数(数目可在max_char_count修改)，对应读到响应符号时转移状态在states中的id
+runtime_state中的history 存储fire过程中每一步从哪个状态转移回来，移动方向，修改之前的字符
+
+view_tape类：
+从存储的图灵机的引用上获取一段字符，不对图灵机做修改
+
+用户在编辑状态只修改graph对象内部的node和link结构，对图灵机本身没有任何影响。当用户选择运行图灵机时，graph对象会调用自己的方法将数据转换成图灵机运行时需要的表格形式
+graph对象中状态和关联的结构应该方便处理编辑时的数据更新
+
+d3的append是插入到父节点的最后一个孩子的位置,selectAll返回一个group数组和parent数组，parent数组存的是上一个selectAll的对象,enter会对每一个group实行一次完整的插入

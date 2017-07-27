@@ -1,0 +1,69 @@
+svg
+{
+	border: solid
+}
+path.link
+{
+  fill: none;
+  stroke: #000;
+  stroke-width: 4px;
+  cursor: default;
+}
+path.link.selected
+{
+	stroke-dasharray: 10,2;
+}
+circle.node {
+  stroke-width: 2px;
+  cursor: pointer;
+  fill: #FFF;
+  stroke: #000;
+}
+circle.node.selected
+{
+	fill:coral;
+}
+circle.node.moving
+{
+	fill:lightblue;
+}
+circle.node.hit
+{
+  fill:red;
+}
+rect.rect_tape
+{
+  fill:#FFF;
+  stroke-width:1px;
+  stroke:#000 ;
+}
+text.text_lattice
+{
+  text-anchor: middle;
+  font-weight: bold;
+  font-size: 30px;
+}
+text.text_node
+{
+  font-weight: bold
+}
+line.arrow-tape
+{
+  stroke: #000;
+  stroke-width:5px;
+}
+.dlg-btn-container
+{
+  display: flex;
+  justify-content: space-between;
+}
+.container_editor
+{
+  display: flex;
+  justify-content: space-between;
+}
+.container_tape
+{
+  display: flex;
+  justify-content: center;
+}
