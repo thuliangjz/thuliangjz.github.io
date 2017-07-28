@@ -161,6 +161,11 @@ dialog.prototype.on_back_to_ready = function()
 		{
 			msg.emit('msg_save')
 		})
+	btns.append('button').text('click here to try a model')
+		.on('click', function()
+		{
+			msg.emit('msg_model_required')
+		})
 	btns.selectAll('button').attr('type', 'button').attr('class', 'btn btn-default')
 }
 dialog.prototype.set_input_clicked = function()

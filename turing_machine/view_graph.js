@@ -721,3 +721,25 @@ view_graph.prototype.on_save = function()
 		this.nodes[i].idx_tmp_save = undefined
 	}
 }
+view_graph.prototype.on_model_required = function()
+{
+	var nodes = [
+	{x:100, y: 100, name:'q1', is_start:true, is_final:false, id:3003},
+	{x:-100, y: 100, name:'q2', is_start:false, is_final:false, id:3001},
+	{x:200, y: 200, name:'q3', is_start:false, is_final:false, id:3002},
+	{x:300, y: 300, name:'q4', is_start:false, is_final:false, id:3003},
+	];
+	var links = [
+	{source:nodes[0], target:nodes[0], transition:[[1, -1, 1]]},
+	{source:nodes[0], target:nodes[1], transition:[[0, 1, 1]]},
+	{source:nodes[1], target:nodes[0], transition:[[0, -1, 1]]},
+	{source:nodes[1], target:nodes[1], transition:[[1, 1, 1]]},
+	]
+	this.links = links
+	this.nodes = nodes
+	this.start_node = nodes[0]
+	this.final_node = nodes[3]
+	this.tape = [0, 0, 0]
+	this.last_node_id = 3004
+	this.edit_update()
+}

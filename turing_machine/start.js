@@ -25,24 +25,13 @@ msg.bind('msg_fire_tm_reverse', app_tm.on_fire_tm_reverse, app_tm)
 msg.bind('msg_fired', app_graph.on_tm_fired, app_graph)
 msg.bind('msg_link_delete', app_dlg.on_back_to_ready, app_dlg)
 msg.bind('msg_save', app_graph.on_save, app_graph)
+msg.bind('msg_model_required', app_graph.on_model_required, app_graph)
 
 msg.emit('msg_back_to_ready')
 app_graph.edit_update()
 d3.select(window).on('keydown', function(){app_graph.keydown(d3.event)})
 
 //test code
-/*
-var nodes = [
-{x:100, y: 100, obj_graph:app_graph, name:'q1', is_start:true, is_final:false},
-{x:-100, y: 100, obj_graph:app_graph, name:'q2', is_start:false, is_final:false},
-{x:100, y: 200, obj_graph:app_graph, name:'q3', is_start:false, is_final:false},
-{x:-100, y: -100, obj_graph:app_graph, name:'q4', is_start:false, is_final:true}
-]
-var links = [
-{source:nodes[0], target:nodes[1], transition:[[0, 1, 1]]},
-{source:nodes[1], target:nodes[2], transition:[[0, 1, 1]]},
-{source:nodes[2], target:nodes[0], transition:[[0, 1, 1]]},
-]*/
 /*
 var nodes = [
 {x:100, y: 100, name:'q1', is_start:true, is_final:false},
