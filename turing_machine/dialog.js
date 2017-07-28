@@ -76,7 +76,7 @@ dialog.prototype.on_link_selected = function(selected_link)
 }
 dialog.prototype.create_link_info_table = function(div, transition)
 {
-	var table = div.append('table').attr('class', 'table')
+	var table = div.append('table').attr('class', 'table-bordered')
 	var head = table.append('thead').append('tr')
 	head.append('th').text('character')
 	head.append('th').text('selected')
