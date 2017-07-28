@@ -43,9 +43,6 @@ function view_graph(name_svg)
 	.on('drag', function(){
 		d3.event.preventDefault()
 	})
-	//svg selections
-	//this.path = this.svg.append('svg:g').selectAll('path')
-	//this.circle = this.svg.append('svg:g').selectAll('g')
 	this.path = this.svg.append('g')
 	this.circle = this.svg.append('g')
 	//control variables
@@ -61,7 +58,21 @@ function view_graph(name_svg)
 	this.final_node = null
 	//runtime variables
 	this.node_hit = null
-	//develop code
+	//check for storage
+	if(window.localStorage['nodes_graph'])
+	{
+		this.nodes =  window.JSON.parse(window.localStorage['nodes_graph'])
+		this.links = window.JSON.parse(window.localStorage['links_graph'])
+		for(var i = 0; i < this.links.length; ++i)
+		{
+			this.links[i].source = this.nodes[this.links[i].source]
+			this.links[i].target = this.nodes[this.links[i].target]
+		}
+		var idx_start = window.JSON.parse(window.localStorage['start_graph'])
+		var idx_final = window.JSON.parse(window.localStorage['final_graph'])
+		this.start_node = idx_start ? this.nodes[idx_start] : null
+		this.final_node = idx_final ? this.nodes[idx_final] : null
+	}
 }
 view_graph.prototype.READY = 0
 view_graph.prototype.NODE_SELECTED = 1
@@ -101,6 +112,7 @@ msg_tape_init:			str
 //click event handler, event is the mouse position(d3.mouse(this)), obj is the event's target
 view_graph.prototype.clicked = function(event, type, obj)
 {
+	var valid = true
 	switch(this.state)
 	{
 	case this.READY:
@@ -110,7 +122,10 @@ view_graph.prototype.clicked = function(event, type, obj)
 		//judgement has been made when pressin 't'
 		this.click_add_link(event, type, obj)
 		break
+	default:
+		valid = false
 	}
+	if(valid)
 	this.edit_update()
 }
 view_graph.prototype.clicked_ready = function(event, type, obj)
@@ -189,20 +204,8 @@ view_graph.prototype.get_possible_transition = function(node)
 view_graph.prototype.add_node = function(p_x, p_y)
 {
 	//svg entry stands for parent svg's coordinate
-	var node = {x:p_x, y:p_y, id:this.last_node_id++, 
-		obj_graph:this, name:'q'+this.last_node_id.toString()}				//vx and vy are only used by force simulator
+	var node = {x:p_x, y:p_y, id:this.last_node_id++, name:'q'+this.last_node_id.toString()}				//vx and vy are only used by force simulator
 	this.nodes.push(node)
-	//dev
-	/*
-	node.watch('x', function(id, v_0, v_1){
-		console.log(v_0 + ' ' + v_1)
-		return v_1
-	})
-	node.watch('vx',function(id, v_0, v_1)
-	{
-		console.log('vx change to' + v_1)
-	})*/
-
 	return node
 }
 view_graph.prototype.add_link = function(pt_s, pt_t)
@@ -470,35 +473,6 @@ view_graph.prototype.edit_update = function()
 		{
 			return d.name + (d === obj_graph.start_node ? '(start)' : '') + (d === obj_graph.final_node ? '(final)' : '')
 		})
-	/*
-	circle.enter().append('g')
-				.append('circle')
-				.attr('class', 'node')
-				.attr('r', 12)
-				.on('click', function(d)
-				{
-					obj_graph.clicked(d3.mouse(obj_graph.svg_dom), view_graph.prototype.OBJ_NODE, d)
-					d3.event.stopPropagation()
-				})
-				.on('mousedown', function(d)
-				{
-					obj_graph.drag(view_graph.prototype.DRAG_NODE_PRESSED, d3.mouse(obj_graph.svg_dom), d)
-					d3.event.stopPropagation()
-				})
-				.merge(circle)
-				.selectAll('circle')
-				.classed('selected', function(d){
-					if(obj_graph.state === view_graph.prototype.NODE_SELECTED ||
-						obj_graph.state === view_graph.prototype.NODE_ADD_LINK)
-						return d === obj_graph.selected_node.node
-					return false})
-				.classed('moving', function(d)
-				{
-					if(obj_graph.state === view_graph.prototype.MOVING)
-						return d === obj_graph.node_moved
-					return false
-				})
-	*/
 	this.position_update()
 	if(this.force_enabled && this.state === this.READY)
 	{
@@ -721,17 +695,29 @@ view_graph.prototype.create_tape_slice = function(s, e)
 
 	return arr_raw
 }
-
-/*
-//test code
-d3.select('body').append('svg')
-				.attr('id', 'svg-graph')
-				.attr('width', 800)
-				.attr('height', 800)
-var graph = new view_graph('#svg-graph')
-d3.select(window).on('keydown', function(){graph.keydown(d3.event)})
-
-function test_attr(d)
+view_graph.prototype.on_save = function()
 {
-	return 'translate(' + d.x + ',' + d.y + ')';
-}*/
+	var str_nodes = window.JSON.stringify(this.nodes)
+	var lks_save = []
+	for(var i = 0; i < this.nodes.length; ++i)
+	{
+		this.nodes[i].idx_tmp_save = i
+	}
+	for(var i = 0; i < this.links.length; ++i)
+	{
+		lks_save.push({source:this.links[i].source.idx_tmp_save,
+						target:this.links[i].target.idx_tmp_save,
+						transition:this.links[i].transition})
+	}
+	var str_links = window.JSON.stringify(lks_save)
+	var idx_start_save = window.JSON.stringify(this.start_node ? this.start_node.idx_tmp_save : null)
+	var idx_final_save = window.JSON.stringify(this.final_node ? this.final_node.idx_tmp_save : null)
+	window.localStorage['links_graph'] = str_links
+	window.localStorage['nodes_graph'] = str_nodes
+	window.localStorage['start_graph'] = idx_start_save
+	window.localStorage['final_graph'] = idx_final_save
+	for(var i = 0; i < this.nodes.length; ++i)
+	{
+		this.nodes[i].idx_tmp_save = undefined
+	}
+}

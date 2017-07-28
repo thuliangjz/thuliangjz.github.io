@@ -138,23 +138,30 @@ dialog.prototype.on_back_to_ready = function()
 	//paste help information here
 	this.container.append('div').append('p').text(this.help_text_ready)
 	var ul =  this.container.append('ul').attr('class', 'list-group')
-	ul.append('li').attr('class', 'list-group-item').text('press m to arrange layout manually')
-	ul.append('li').attr('class', 'list-group-item').text('press a to arrange layout automatically(press again to quit)')
-	ul.append('li').attr('class', 'list-group-item').text('choose a node or link then edit it')
-	
+	ul.append('li').text('press \"m\" to arrange layout manually')
+	ul.append('li').text('press \"a\" to arrange layout automatically(press again to quit)')
+	ul.append('li').text('choose a node or link then edit it')
+	ul.append('li').text('return to this dialog at any time by pressing \"esc\"')
+	ul.selectAll('li').attr('class', 'list-group-item')
 	var obj_dlg = this
 	var btns = this.container.append('div').attr('class', 'dlg-btn-container')
-	btns.append('button').attr('type', 'button').attr('class', 'btn btn-default').text('run!')
+	btns.append('button').text('run!')
 		.on('click', function()
 		{
 			msg.emit('msg_run_prepare')
 		})
-	btns.append('button').attr('type', 'button').attr('class', 'btn btn-default').text('set input')
+	btns.append('button').text('set input')
 		.on('click', function()
 		{
 			msg.emit('msg_setting_tape')
 			obj_dlg.set_input_clicked()
 		})
+	btns.append('button').text('save')
+		.on('click', function()
+		{
+			msg.emit('msg_save')
+		})
+	btns.selectAll('button').attr('type', 'button').attr('class', 'btn btn-default')
 }
 dialog.prototype.set_input_clicked = function()
 {
@@ -381,7 +388,7 @@ dialog.prototype.on_fired_node_info = function(node, link_array, state, tape_con
 		this.div_info_run.append('p').text('congratulations, finished!')
 		break
 	case 2:
-		this.div_info.append('p').text('the machine halted!')
+		this.div_info_run.append('p').text('the machine halted!')
 		break;
 	case 3:
 		//reverse
