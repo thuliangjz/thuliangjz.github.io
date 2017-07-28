@@ -15,13 +15,14 @@ function dialog(name)
 	this.node_selected = null
 	this.start_selected = false
 	this.final_selected = false
+	this.node_info = null		//also used in runtime update
 	//response for runtime control
 	this.state = null
 	this.time_transition = 0
 	this.div_info_run = null
 }
-dialog.prototype.help_text_set_input = 'help text'
-dialog.prototype.help_text_ready = 'help text ready'
+dialog.prototype.help_text_set_input = 'set your tape here, please note that all non-number characters will be regarded as \'B\''
+dialog.prototype.help_text_ready = 'welcome to this page!, you can design your turing machie freely now!, you can:'
 dialog.prototype.PREPARE_ERROR = [
 'start state has not been selected!',
 'final state has not been selected!',
@@ -136,6 +137,11 @@ dialog.prototype.on_back_to_ready = function()
 	this.container.selectAll('*').remove()
 	//paste help information here
 	this.container.append('div').append('p').text(this.help_text_ready)
+	var ul =  this.container.append('ul').attr('class', 'list-group')
+	ul.append('li').attr('class', 'list-group-item').text('press m to arrange layout manually')
+	ul.append('li').attr('class', 'list-group-item').text('press a to arrange layout automatically(press again to quit)')
+	ul.append('li').attr('class', 'list-group-item').text('choose a node or link then edit it')
+	
 	var obj_dlg = this
 	var btns = this.container.append('div').attr('class', 'dlg-btn-container')
 	btns.append('button').attr('type', 'button').attr('class', 'btn btn-default').text('run!')
@@ -205,10 +211,21 @@ dialog.prototype.on_exit_link_selected = function()
 }
 dialog.prototype.on_node_selected = function(node, link_array)
 {
+	var obj_dlg = this
 	this.container.selectAll('*').remove()
 	//generate node infomation table here
-	var form = this.container.append('form').attr('class', 'form-inline').attr('role', 'form')
-	var obj_dlg = this
+	var form = this.container.append('form').attr('class', 'form').attr('role', 'form')
+	var name_div = form.append('div').attr('class', 'form-group')
+	name_div.append('p').attr('class', 'help-block').text('node name')
+	name_div.append('input').attr('type', 'input')
+			.on('input', function()
+			{
+				obj_dlg.node_selected.name = this.value
+			})
+			.attr('class', 'form-control').node().value = node.name
+	form.append('p').attr('class', 'help-block').text('node infomation')
+	var arr_info = this.create_node_info_array(node, link_array)
+	var table = this.create_node_info_table(arr_info, form)
 	var box_start = form.append('div').attr('class', 'form-group')
 		.append('label').text('set as start')
 		.append('input').attr('type', 'checkbox')
@@ -234,6 +251,8 @@ dialog.prototype.on_node_selected = function(node, link_array)
 		}
 		this.final_selected = box_final.checked
 		this.node_selected = node
+	this.container.append('p').text('press delete to delete this node')
+	this.container.append('p').text('press t to add links to other nodes')
 }
 dialog.prototype.on_exit_node_selected = function()
 {
@@ -331,8 +350,22 @@ dialog.prototype.on_tape_finished = function()
 		msg.emit('msg_fire_tm')
 	}
 }
-dialog.prototype.on_fired_node_info = function(node, link_array, state)
+dialog.prototype.on_fired_node_info = function(node, link_array, state, tape_contont)
 {
+	this.div_info_run.selectAll('*').remove()
+	var arr_info = this.create_node_info_array(node, link_array)
+	var table = this.create_node_info_table(arr_info, this.div_info_run)
+	//highlight transitions
+	for(var i = 0; i < arr_info.length; ++i)
+	{
+		if(arr_info[i].on === tape_contont)
+			arr_info[i].highlight = true
+	}
+	table.classed('transition_info', function(d)
+	{
+		return d.highlight
+	})
+
 	switch(state)
 	{
 	case 0:
@@ -348,6 +381,7 @@ dialog.prototype.on_fired_node_info = function(node, link_array, state)
 		this.div_info_run.append('p').text('congratulations, finished!')
 		break
 	case 2:
+		this.div_info.append('p').text('the machine halted!')
 		break;
 	case 3:
 		//reverse
@@ -358,4 +392,39 @@ dialog.prototype.on_fired_node_info = function(node, link_array, state)
 		}
 		break
 	}
+}
+//format:{name(target), on(number), dir:number, change_to:number}
+dialog.prototype.create_node_info_array = function(node, link_array)
+{
+	var arr_info_node = []
+	for(var i = 0; i < link_array.length; ++i)
+	{
+		for(var j = 0; j < link_array[i].transition.length; ++j)
+		{
+			var tmp = {}
+			var trans = link_array[i].transition[j]
+			tmp.name = link_array[i].target.name
+			tmp.on = trans[0]
+			tmp.change_to = trans[2]
+			tmp.direction = trans[1]
+			arr_info_node.push(tmp)
+		}	
+	}
+	//creating a table
+	return arr_info_node
+}
+dialog.prototype.create_node_info_table = function(info_array, div_table)
+{
+	var table =	div_table.append('table').attr('class', 'table table-bordered')
+	var head = table.append('thead').append('tr').classed('node_info', true)
+	head.append('th').text('target name')
+	head.append('th').text('on')
+	head.append('th').text('direction')
+	head.append('th').text('change to')
+	var body = table.selectAll('tr').filter(function(){return false}).data(info_array).enter().append('tr').classed('node_info', true)
+	body.append('td').text(function(d){return d.name})
+	body.append('td').text(function(d){return turing_machine.prototype.translate_char(d.on)})
+	body.append('td').text(function(d){return (d.direction === 1 ? 'R' : 'L')})
+	body.append('td').text(function(d){return turing_machine.prototype.translate_char(d.change_to)})
+	return body
 }

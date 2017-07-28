@@ -503,7 +503,7 @@ view_graph.prototype.edit_update = function()
 	if(this.force_enabled && this.state === this.READY)
 	{
 		this.force = d3.forceSimulation(this.nodes)
-    	.force("charge", d3.forceManyBody().strength(-500))
+    	.force("charge", d3.forceManyBody().strength(-100))
     	.force("link", d3.forceLink(this.links).distance(150))
 	    .on('tick', obj_injection(view_graph.prototype.force_tick, this))
 	}
@@ -524,7 +524,12 @@ view_graph.prototype.position_update = function()
         sourceY = d.source.y + (sourcePadding * normY),
         targetX = d.target.x - (targetPadding * normX),
         targetY = d.target.y - (targetPadding * normY);
-    return 'M' + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;
+        if(dist > 0)
+        {
+        	return 'M' + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;	
+        }
+        var start = d.target.x - 20, end = d.target.x + 20;
+       	return(['M', start, d.target.y, 'A', 30, 30, 0, 1, 0, end, d.target.y].join(' '))
   	});
 	circle.attr('transform',function(d){return 'translate(' + d.x + ',' + d.y + ')'});
 }
@@ -538,14 +543,19 @@ view_graph.prototype.update_run = function()
 	var arr_wbx = this.svg.attr('viewBox').split(' ')
 	for(var i = 0; i < 4; ++i)
 	{arr_wbx[i] = Number(arr_wbx[i])}
-	if(Math.abs(this.node_hit.x - arr_wbx[0]) > arr_wbx[2] ||
-		Math.abs(this.node_hit.y - arr_wbx[1]) > arr_wbx[3])
+	in_interval(0, arr_wbx[2], this.node_hit.x - arr_wbx[0])
+	if( !in_interval(0, arr_wbx[2], this.node_hit.x - arr_wbx[0]) ||
+		!in_interval(0, arr_wbx[3], this.node_hit.y - arr_wbx[1]))
 	{
 		//move view port to center
 		arr_wbx[0] += this.node_hit.x - arr_wbx[0] - arr_wbx[2] / 2
 		arr_wbx[1] += this.node_hit.y - arr_wbx[1] - arr_wbx[3] / 2
 		this.svg.attr('viewBox', arr_wbx.join(' '))
 	}
+}
+function in_interval(s, e, num)
+{
+	return num > s && num < e
 }
 view_graph.prototype.force_tick = function()
 {
@@ -660,6 +670,7 @@ view_graph.prototype.compile_tm = function()
 view_graph.prototype.on_dlg_back_to_ready = function()
 {
 	this.state = this.READY
+	this.edit_update()
 	msg.emit('msg_back_to_ready')
 }
 view_graph.prototype.on_tm_fired = function(runtime, state, tape_new)
@@ -667,7 +678,7 @@ view_graph.prototype.on_tm_fired = function(runtime, state, tape_new)
 	this.tape = tape_new
 	var node = this.nodes[runtime.idx_state]
 	this.node_hit = node
-	msg.emit('msg_fired_node_info', node, this.get_link(node), state)
+	msg.emit('msg_fired_node_info', node, this.get_link(node), state, this.tape[runtime.idx_tape])
 	//virations on tape's update(instant/animation)
 	var s = runtime.idx_tape - (tape.prototype.LENGTH_TAPE_REAL - 1) / 2,
 		e = runtime.idx_tape + (tape.prototype.LENGTH_TAPE_REAL - 1) / 2 + 1;

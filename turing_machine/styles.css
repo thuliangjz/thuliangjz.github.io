@@ -1,6 +1,5 @@
 svg
 {
-	border: solid
 }
 path.link
 {
@@ -60,10 +59,23 @@ line.arrow-tape
 .container_editor
 {
   display: flex;
-  justify-content: space-between;
+  justify-content:space-between;
 }
 .container_tape
 {
   display: flex;
   justify-content: center;
+}
+.node_info
+{
+  text-align: center;
+}
+.transition_info
+{
+  background-color: coral
+}
+.div_control
+{
+  border-color: #ccc
+  border:solid;
 }
