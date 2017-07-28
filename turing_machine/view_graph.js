@@ -436,7 +436,6 @@ view_graph.prototype.edit_update = function()
 	//move events are handled by svg element
 	var g = circle.enter().append('g')
 	g.append('circle')
-				.attr('class', 'node')
 				.attr('r', 12)
 				.on('click', function(d)
 				{
@@ -454,6 +453,7 @@ view_graph.prototype.edit_update = function()
 			return d.name
 		})
 	g.merge(circle).selectAll('circle')
+				.attr('class', 'node')
 				.classed('selected', function(d){
 					if(obj_graph.state === view_graph.prototype.NODE_SELECTED ||
 						obj_graph.state === view_graph.prototype.NODE_ADD_LINK)
